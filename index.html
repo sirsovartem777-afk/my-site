@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>McArtemSound | Простой плеер</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, 'Segoe UI', sans-serif;
+        }
+        body {
+            background: radial-gradient(circle at 10% 20%, #1a0505 0%, #0a0000 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .player {
+            max-width: 700px;
+            width: 100%;
+            background: #0c0101;
+            border-radius: 2rem;
+            box-shadow: 0 30px 45px rgba(0,0,0,0.6), 0 0 0 1px #c41e1e30;
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(95deg, #2b0303, #3c0808);
+            padding: 1rem 1.8rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #e02b2b;
+        }
+        .logo {
+            font-size: 1.7rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ff4d4d, #ffb347);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+        .badge {
+            background: #aa2222;
+            padding: 6px 14px;
+            border-radius: 40px;
+            font-size: 0.75rem;
+            color: white;
+        }
+        .search-area {
+            padding: 12px 20px;
+            background: #0f0101;
+        }
+        .search-box {
+            display: flex;
+            align-items: center;
+            background: #1f0a0a;
+            border-radius: 60px;
+            padding: 5px 18px;
+            border: 1px solid #a53333;
+        }
+        .search-box input {
+            background: transparent;
+            border: none;
+            width: 100%;
+            padding: 10px 0;
+            color: white;
+            outline: none;
+        }
+        .search-box input::placeholder {
+            color: #ffaaaa;
+        }
+        .artwork {
+            text-align: center;
+            padding: 25px;
+            background: linear-gradient(125deg, #1f0303, #2c0404);
+            margin: 16px 20px;
+            border-radius: 1.5rem;
+        }
+        .artwork .icon {
+            font-size: 4rem;
+        }
+        .now-playing {
+            font-size: 0.7rem;
+            color: #ff7b7b;
+            letter-spacing: 2px;
+            margin-top: 8px;
+        }
+        .track-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #ffdbdb;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding: 0 20px;
+        }
+        .track-artist {
+            text-align: center;
+            color: #ffaeae;
+            margin-top: 5px;
+        }
+        .progress-section {
+            padding: 0 20px;
+            margin: 15px 0;
+        }
+        .progress-bar {
+            background: #2f1414;
+            border-radius: 40px;
+            height: 6px;
+            cursor: pointer;
+        }
+        .progress-fill {
+            background: linear-gradient(90deg, #e03a3a, #ff7777);
+            width: 0%;
+            height: 6px;
+            border-radius: 40px;
+        }
+        .time {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            font-size: 0.7rem;
+            color: #ffb5b5;
+        }
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin: 20px 0;
+        }
+        .controls button {
+            background: #260606;
+            border: none;
+            width: 55px;
+            height: 55px;
+            border-radius: 60px;
+            font-size: 1.5rem;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 0 0 1px #aa2e2e;
+        }
+        .controls .play {
+            background: linear-gradient(145deg, #d12e2e, #9a1515);
+            width: 70px;
+            height: 70px;
+            font-size: 2rem;
+        }
+        .playlist {
+            background: #0a0101e6;
+            margin: 0 16px 20px;
+            border-radius: 1.5rem;
+            border: 1px solid #c41e1e50;
+        }
+        .playlist-header {
+            background: #2b0707;
+            padding: 12px 18px;
+            border-bottom: 1px solid #c03535;
+            color: #ffc5c5;
+        }
+        .track-list {
+            max-height: 280px;
+            overflow-y: auto;
+            padding: 8px;
+        }
+        .track-item {
+            background: #18050580;
+            padding: 10px 14px;
+            margin-bottom: 6px;
+            border-radius: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+        .track-item.active {
+            background: #3e0f0f;
+            border-left: 4px solid #ff3c3c;
+        }
+        .track-item:hover {
+            background: #531414;
+        }
+        .track-name {
+            font-weight: 600;
+            color: #ffe0e0;
+        }
+        .track-duration {
+            font-size: 0.7rem;
+            color: #ffb9b9;
+        }
+        .empty {
+            text-align: center;
+            padding: 30px;
+            color: #ff8888;
+        }
+        @media (max-width: 550px) {
+            .track-title { font-size: 1.3rem; }
+            .controls button { width: 48px; height: 48px; }
+            .controls .play { width: 60px; height: 60px; }
+            .logo { font-size: 1.3rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="player">
+    <div class="header">
+        <span class="logo">🎧 McArtemSound</span>
+        <span class="badge" id="counter">0 треков</span>
+    </div>
+    <div class="search-area">
+        <div class="search-box">
+            <span>🔍</span>
+            <input type="text" id="search" placeholder="Поиск...">
+        </div>
+    </div>
+    <div class="artwork">
+        <div class="icon">🎵</div>
+        <div class="now-playing">СЕЙЧАС ИГРАЕТ</div>
+        <div class="art-track" style="margin-top:10px;font-size:0.9rem;color:#ffaeae" id="artTitle">—</div>
+    </div>
+    <div class="track-title" id="currentTitle">—</div>
+    <div class="track-artist" id="currentArtist">—</div>
+    <div class="progress-section">
+        <div class="progress-bar" id="progressBar"><div class="progress-fill" id="progressFill"></div></div>
+        <div class="time"><span id="currentTime">0:00</span><span id="totalTime">0:00</span></div>
+    </div>
+    <div class="controls">
+        <button id="prev">⏮</button>
+        <button class="play" id="playPause">▶</button>
+        <button id="next">⏭</button>
+    </div>
+    <div class="playlist">
+        <div class="playlist-header">📁 ПЛЕЙЛИСТ (из папки tracks)</div>
+        <div class="track-list" id="trackList">⏳ Загрузка...</div>
+    </div>
+</div>
+<script>
+    let tracks = [];
+    let filteredTracks = [];
+    let currentIdx = 0;
+    let isPlaying = false;
+    let audio = new Audio();
+    let seeking = false;
+
+    const searchInput = document.getElementById('search');
+    const trackListDiv = document.getElementById('trackList');
+    const counterSpan = document.getElementById('counter');
+    const currentTitleSpan = document.getElementById('currentTitle');
+    const currentArtistSpan = document.getElementById('currentArtist');
+    const artTitleSpan = document.getElementById('artTitle');
+    const progressFill = document.getElementById('progressFill');
+    const progressBar = document.getElementById('progressBar');
+    const currentTimeSpan = document.getElementById('currentTime');
+    const totalTimeSpan = document.getElementById('totalTime');
+    const playPauseBtn = document.getElementById('playPause');
+    const prevBtn = document.getElementById('prev');
+    const nextBtn = document.getElementById('next');
+
+    function formatTime(sec) {
+        if (isNaN(sec)) return '0:00';
+        let m = Math.floor(sec / 60);
+        let s = Math.floor(sec % 60);
+        return m + ':' + (s < 10 ? '0' + s : s);
+    }
+
+    function parseArtistTitle(filename) {
+        let name = filename.replace(/\.[^/.]+$/, '');
+        if (name.includes(' - ')) {
+            let parts = name.split(' - ');
+            return { artist: parts[0], title: parts.slice(1).join(' - ') };
+        }
+        return { artist: 'McArtemSound', title: name };
+    }
+
+    async function loadTracks() {
+        try {
+            let res = await fetch('/api/tracks');
+            let files = await res.json();
+            tracks = files.map(f => {
+                let { artist, title } = parseArtistTitle(f);
+                return { name: title, artist: artist, file: f, url: '/tracks/' + f, duration: null };
+            });
+            applySearch();
+        } catch(e) {
+            trackListDiv.innerHTML = '<div class="empty">❌ Ошибка: запустите через сервер (node server.js)</div>';
+        }
+    }
+
+    function applySearch() {
+        let q = searchInput.value.toLowerCase();
+        filteredTracks = q ? tracks.filter(t => t.name.toLowerCase().includes(q) || t.artist.toLowerCase().includes(q)) : [...tracks];
+        if (filteredTracks.length && currentIdx >= filteredTracks.length) currentIdx = 0;
+        renderList();
+        counterSpan.innerText = filteredTracks.length + ' ' + (filteredTracks.length % 10 === 1 && filteredTracks.length % 100 !== 11 ? 'трек' : 'треков');
+        if (filteredTracks.length && (!audio.src || audio.paused)) loadTrack(0);
+    }
+
+    function renderList() {
+        if (!filteredTracks.length) {
+            trackListDiv.innerHTML = '<div class="empty">🎶 Нет треков в папке tracks</div>';
+            return;
+        }
+        trackListDiv.innerHTML = filteredTracks.map((t, i) => `
+            <div class="track-item ${i === currentIdx ? 'active' : ''}" data-index="${i}">
+                <div><div class="track-name">${escapeHtml(t.name)}</div><div style="font-size:0.7rem;color:#ffaeae">${escapeHtml(t.artist)}</div></div>
+                <div class="track-duration">${t.duration || '--:--'}</div>
+            </div>
+        `).join('');
+        document.querySelectorAll('.track-item').forEach(el => {
+            el.addEventListener('click', () => {
+                let idx = parseInt(el.dataset.index);
+                if (idx === currentIdx && audio.src) togglePlayPause();
+                else { currentIdx = idx; loadTrack(currentIdx); if (isPlaying) audio.play(); else audio.play().then(()=>{isPlaying=true;updateUI();}).catch(()=>{}); updateUI(); renderList(); }
+            });
+        });
+    }
+
+    function escapeHtml(str) { return str.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'})[m]); }
+
+    function loadTrack(index) {
+        if (!filteredTracks[index]) return;
+        let t = filteredTracks[index];
+        audio.src = t.url;
+        audio.load();
+        currentTitleSpan.innerText = t.name;
+        currentArtistSpan.innerText = t.artist;
+        artTitleSpan.innerText = t.name;
+        progressFill.style.width = '0%';
+        currentTimeSpan.innerText = '0:00';
+        totalTimeSpan.innerText = t.duration || '0:00';
+        
+        audio.onloadedmetadata = () => {
+            if (!isNaN(audio.duration)) {
+                let dur = formatTime(audio.duration);
+                totalTimeSpan.innerText = dur;
+                t.duration = dur;
+                renderList();
+            }
+        };
+        audio.ontimeupdate = () => {
+            if (!seeking && audio.duration) {
+                let percent = (audio.currentTime / audio.duration) * 100;
+                progressFill.style.width = percent + '%';
+                currentTimeSpan.innerText = formatTime(audio.currentTime);
+            }
+        };
+        audio.onended = () => nextTrack();
+    }
+
+    function playCurrent() { audio.play().then(()=>{isPlaying=true;updateUI();}).catch(()=>{}); }
+    function pauseCurrent() { audio.pause(); isPlaying=false; updateUI(); }
+    function togglePlayPause() { filteredTracks.length ? (isPlaying ? pauseCurrent() : playCurrent()) : null; }
+    function nextTrack() { if(filteredTracks.length){ currentIdx = (currentIdx+1)%filteredTracks.length; loadTrack(currentIdx); if(isPlaying) audio.play(); renderList(); } }
+    function prevTrack() { if(filteredTracks.length){ currentIdx = (currentIdx-1+filteredTracks.length)%filteredTracks.length; loadTrack(currentIdx); if(isPlaying) audio.play(); renderList(); } }
+    function updateUI() { playPauseBtn.innerText = isPlaying ? '⏸' : '▶'; }
+
+    progressBar.addEventListener('mousedown', (e) => {
+        if(!audio.duration) return;
+        seeking = true;
+        let rect = progressBar.getBoundingClientRect();
+        let percent = Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width));
+        audio.currentTime = percent * audio.duration;
+        progressFill.style.width = percent*100 + '%';
+        currentTimeSpan.innerText = formatTime(audio.currentTime);
+    });
+    window.addEventListener('mouseup', () => { seeking = false; });
+    window.addEventListener('mousemove', (e) => {
+        if(seeking && audio.duration){
+            let rect = progressBar.getBoundingClientRect();
+            let percent = Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width));
+            progressFill.style.width = percent*100 + '%';
+            currentTimeSpan.innerText = formatTime(percent * audio.duration);
+        }
+    });
+
+    playPauseBtn.addEventListener('click', togglePlayPause);
+    prevBtn.addEventListener('click', prevTrack);
+    nextBtn.addEventListener('click', nextTrack);
+    searchInput.addEventListener('input', () => { applySearch(); if(filteredTracks.length && currentIdx >= filteredTracks.length) currentIdx=0; if(filteredTracks.length) loadTrack(currentIdx); else { currentTitleSpan.innerText='—'; currentArtistSpan.innerText='—'; artTitleSpan.innerText='—'; } });
+
+    loadTracks();
+</script>
+</body>
+</html>
